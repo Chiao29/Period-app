@@ -2,20 +2,23 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Flow - 生理期追蹤</title>
     
-    <!-- Android 與 iOS 的 APP 化優化 -->
-    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#ff375f">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
-    <style>
+    <link rel="apple-touch-icon" href="app-icon.png">
+    
+    <link rel="icon" type="image/png" href="app-icon.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#f2f2f7"> <style>
         :root { 
             --apple-pink: #ff375f; 
             --apple-bg: #f2f2f7; 
-            --apple-card: #ffffff; 
-            --apple-red: #ff3b30;
+            --apple-card: rgba(255, 255, 255, 0.85); /* 讓卡片本身也帶點透明感 */
+            --apple-text: #1c1c1e;
+            --apple-secondary-text: #8e8e93;
         }
         
         body { 
@@ -23,22 +26,25 @@
             background-color: var(--apple-bg); 
             margin: 0; 
             padding: 20px; 
+            padding-top: calc(env(safe-area-inset-top) + 20px); /* 避開 iOS 的瀏海屏 */
             display: flex; 
             flex-direction: column; 
             align-items: center;
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* 頂部預測狀態卡片 */
+        /* 頂部預測狀態卡片 - 這裡也加入透明度 */
         .status-card { 
-            background: linear-gradient(135deg, #ff7e95 0%, #ff375f 100%); 
+            background: linear-gradient(135deg, rgba(255, 126, 149, 0.8) 0%, rgba(255, 55, 95, 0.8) 100%); 
+            backdrop-filter: blur(20px); /* iOS 的毛玻璃效果 */
+            -webkit-backdrop-filter: blur(20px);
             width: 100%; 
             max-width: 400px; 
             border-radius: 28px; 
             padding: 30px 20px; 
             color: white; 
             text-align: center; 
-            box-shadow: 0 10px 20px rgba(255, 55, 95, 0.3); 
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05); 
             margin-bottom: 25px; 
             box-sizing: border-box;
         }
@@ -48,31 +54,31 @@
         /* 輸入區域 */
         .input-group { 
             background: var(--apple-card); 
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             width: 100%; 
             max-width: 400px; 
             border-radius: 20px; 
             padding: 20px; 
             box-sizing: border-box; 
             margin-bottom: 20px; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03); 
         }
 
-        label { color: #8e8e93; font-size: 0.85rem; font-weight: 600; margin-left: 5px; }
+        label { color: var(--apple-secondary-text); font-size: 0.85rem; font-weight: 600; margin-left: 5px; }
 
         input { 
             width: 100%; 
-            border: 2px solid transparent; 
-            background: #f2f2f7; 
+            border: none; 
+            background: rgba(0, 0, 0, 0.05); /* 透明度背景 */
             padding: 12px; 
             border-radius: 12px; 
             margin: 8px 0 15px; 
             font-size: 1rem; 
             box-sizing: border-box;
             outline: none;
-            transition: border 0.3s;
+            color: var(--apple-text);
         }
-        
-        input:focus { border: 2px solid var(--apple-pink); }
 
         button { 
             width: 100%; 
@@ -101,15 +107,14 @@
             justify-content: space-between; 
             align-items: center;
             box-sizing: border-box; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.03); 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02); 
         }
 
         .del-btn {
-            color: var(--apple-red);
+            color: #ff3b30;
             font-size: 0.9rem;
             font-weight: 500;
             cursor: pointer;
-            padding: 5px 10px;
         }
     </style>
 </head>
@@ -139,9 +144,7 @@
         let data = JSON.parse(localStorage.getItem(KEY) || '[]');
         data.push({date: date});
         
-        // 排序：最新的日期在最前面
         data.sort((a,b) => new Date(b.date) - new Date(a.date));
-        
         localStorage.setItem(KEY, JSON.stringify(data));
         render();
     }
@@ -150,7 +153,6 @@
         const list = document.getElementById('recordList');
         const data = JSON.parse(localStorage.getItem(KEY) || '[]');
         
-        // 渲染列表
         list.innerHTML = data.map((r, i) => `
             <div class="record-card">
                 <b style="font-size:1.1rem;">${r.date}</b>
@@ -158,11 +160,10 @@
             </div>
         `).join('');
 
-        // 計算預測
         if(data.length > 0) {
             const lastRecord = new Date(data[0].date);
             const nextDate = new Date(lastRecord);
-            nextDate.setDate(lastRecord.getDate() + 28); // 預設 28 天週期
+            nextDate.setDate(lastRecord.getDate() + 28);
             
             const today = new Date();
             today.setHours(0,0,0,0);
@@ -200,10 +201,10 @@
         }
     }
 
-    // 初始化日期輸入框為今天
     document.getElementById('dateInput').valueAsDate = new Date();
     render();
 </script>
 
 </body>
 </html>
+
