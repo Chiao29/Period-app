@@ -3,149 +3,196 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Flow - 生理期追蹤</title>
+    <title>Flow - 暖心追蹤</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="app-icon.png?v=3">
     
-    <link rel="apple-touch-icon" href="app-icon.png?v=2">>
-    
-    <link rel="icon" type="image/png" href="app-icon.png?v=2">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#f2f2f7"> <style>
+    <style>
         :root { 
-            --apple-pink: #ff375f; 
-            --apple-bg: #f2f2f7; 
-            --apple-card: rgba(255, 255, 255, 0.85); /* 讓卡片本身也帶點透明感 */
-            --apple-text: #1c1c1e;
-            --apple-secondary-text: #8e8e93;
+            --warm-pink: #ff9a9e; 
+            --soft-cream: #fff9f5; /* 類似畫紙的米白色 */
+            --watercolor-bg: #fef0f0;
+            --text-color: #5d4037; /* 深棕色取代純黑，更有手感 */
         }
         
         body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            background-color: var(--apple-bg); 
+            font-family: -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif; 
+            background: linear-gradient(180deg, var(--watercolor-bg) 0%, #fff 100%);
+            color: var(--text-color);
             margin: 0; 
-            padding: 20px; 
-            padding-top: calc(env(safe-area-inset-top) + 20px); /* 避開 iOS 的瀏海屏 */
+            padding: 20px;
+            padding-top: calc(env(safe-area-inset-top) + 20px);
             display: flex; 
             flex-direction: column; 
             align-items: center;
-            -webkit-tap-highlight-color: transparent;
+            min-height: 100vh;
         }
 
-        /* 頂部預測狀態卡片 - 這裡也加入透明度 */
-        .status-card { 
-            background: linear-gradient(135deg, rgba(255, 126, 149, 0.8) 0%, rgba(255, 55, 95, 0.8) 100%); 
-            backdrop-filter: blur(20px); /* iOS 的毛玻璃效果 */
-            -webkit-backdrop-filter: blur(20px);
-            width: 100%; 
-            max-width: 400px; 
-            border-radius: 28px; 
-            padding: 30px 20px; 
-            color: white; 
-            text-align: center; 
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05); 
-            margin-bottom: 25px; 
+        /* 頂部宮崎駿風格圓環 */
+        .status-container {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            width: 100%;
+            max-width: 400px;
+            border-radius: 40px;
+            padding: 40px 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(255, 154, 158, 0.15);
+            margin-bottom: 25px;
+            border: 2px solid rgba(255, 255, 255, 0.8);
             box-sizing: border-box;
+            position: relative;
+            overflow: hidden;
         }
 
-        .days-big { font-size: 4rem; font-weight: 800; margin: 5px 0; }
+        /* 模擬發光卵子寶寶的背景光暈 */
+        .status-container::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,154,158,0.1) 0%, transparent 60%);
+            z-index: -1;
+        }
 
-        /* 輸入區域 */
-        .input-group { 
-            background: var(--apple-card); 
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
+        .days-big { 
+            font-size: 4.5rem; 
+            font-weight: 300; /* 更纖細優雅 */
+            color: var(--warm-pink);
+            margin: 10px 0;
+            text-shadow: 0 0 15px rgba(255, 154, 158, 0.3);
+        }
+
+        .phase-badge {
+            display: inline-block;
+            background: var(--warm-pink);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .warm-tips {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            padding: 0 20px;
+            line-height: 1.5;
+        }
+
+        /* 輸入與功能區 */
+        .card { 
+            background: rgba(255, 255, 255, 0.9); 
             width: 100%; 
             max-width: 400px; 
-            border-radius: 20px; 
-            padding: 20px; 
+            border-radius: 25px; 
+            padding: 25px; 
             box-sizing: border-box; 
             margin-bottom: 20px; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.03); 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03); 
         }
 
-        label { color: var(--apple-secondary-text); font-size: 0.85rem; font-weight: 600; margin-left: 5px; }
+        h3 { margin-top: 0; font-size: 1.1rem; border-left: 4px solid var(--warm-pink); padding-left: 10px; }
 
-        input { 
+        input[type="date"] { 
             width: 100%; 
-            border: none; 
-            background: rgba(0, 0, 0, 0.05); /* 透明度背景 */
+            border: 1px solid #eee; 
+            background: var(--soft-cream); 
             padding: 12px; 
             border-radius: 12px; 
-            margin: 8px 0 15px; 
             font-size: 1rem; 
-            box-sizing: border-box;
-            outline: none;
-            color: var(--apple-text);
+            margin: 10px 0;
+            color: var(--text-color);
         }
 
-        button { 
+        /* 症狀標籤 */
+        .symptom-group { display: flex; flex-wrap: wrap; gap: 8px; margin: 15px 0; }
+        .symptom-tag {
+            padding: 8px 15px;
+            background: #fdf2f2;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+        }
+        .symptom-tag.active {
+            background: var(--warm-pink);
+            color: white;
+        }
+
+        button.main-btn { 
             width: 100%; 
-            background-color: var(--apple-pink); 
+            background: linear-gradient(90deg, #ff9a9e 0%, #fecfef 100%);
             color: white; 
             border: none; 
-            padding: 15px; 
-            border-radius: 15px; 
-            font-size: 1rem; 
-            font-weight: 600; 
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-
-        button:active { opacity: 0.8; }
-
-        /* 紀錄列表 */
-        .record-card { 
-            background: var(--apple-card); 
+            padding: 16px; 
             border-radius: 18px; 
-            padding: 15px 20px; 
-            margin-bottom: 12px; 
-            width: 100%; 
-            max-width: 400px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center;
-            box-sizing: border-box; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.02); 
+            font-size: 1.1rem; 
+            font-weight: 600; 
+            box-shadow: 0 5px 15px rgba(255, 154, 158, 0.4);
         }
 
-        .del-btn {
-            color: #ff3b30;
-            font-size: 0.9rem;
-            font-weight: 500;
-            cursor: pointer;
+        /* 歷史清單 */
+        .history-item {
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #f9f0f0;
         }
+
+        .del-btn { color: #ccc; font-size: 0.8rem; }
     </style>
 </head>
 <body>
 
-    <div class="status-card">
-        <h1 id="statusText" style="font-size:1.2rem; margin:0; opacity:0.9;">距離下次預計</h1>
+    <div class="status-container">
+        <div class="phase-badge" id="phaseText">點擊下方開啟紀錄</div>
         <div class="days-big" id="daysCounter">--</div>
-        <div id="predictDateStr" style="font-size:0.9rem; opacity:0.8;">請先加入第一筆資料</div>
+        <div id="predictDateStr" style="font-size:0.9rem; margin-bottom: 15px;">暖心呵護妳的每一天</div>
+        <div class="warm-tips" id="warmTips">這段時間要對自己溫柔一點喔。</div>
     </div>
 
-    <div class="input-group">
-        <label>開始日期</label>
+    <div class="card">
+        <h3>記錄今天</h3>
         <input type="date" id="dateInput">
-        <button onclick="saveRecord()">加入紀錄</button>
+        <div class="symptom-group">
+            <div class="symptom-tag" onclick="this.classList.toggle('active')">心情好</div>
+            <div class="symptom-tag" onclick="this.classList.toggle('active')">悶悶的</div>
+            <div class="symptom-tag" onclick="this.classList.toggle('active')">想吃甜食</div>
+            <div class="symptom-tag" onclick="this.classList.toggle('active')">累累的</div>
+        </div>
+        <button class="main-btn" onclick="saveRecord()">儲存這筆紀錄</button>
     </div>
 
     <div id="recordList" style="width:100%; max-width:400px;"></div>
 
 <script>
-    const KEY = 'period_data';
+    const KEY = 'period_data_v2';
 
     function saveRecord() {
         const date = document.getElementById('dateInput').value;
         if (!date) return;
         
-        let data = JSON.parse(localStorage.getItem(KEY) || '[]');
-        data.push({date: date});
+        let tags = [];
+        document.querySelectorAll('.symptom-tag.active').forEach(tag => tags.push(tag.innerText));
         
+        let data = JSON.parse(localStorage.getItem(KEY) || '[]');
+        data.push({date: date, tags: tags});
         data.sort((a,b) => new Date(b.date) - new Date(a.date));
+        
         localStorage.setItem(KEY, JSON.stringify(data));
+        
+        // 重置標籤
+        document.querySelectorAll('.symptom-tag').forEach(t => t.classList.remove('active'));
         render();
     }
 
@@ -154,46 +201,58 @@
         const data = JSON.parse(localStorage.getItem(KEY) || '[]');
         
         list.innerHTML = data.map((r, i) => `
-            <div class="record-card">
-                <b style="font-size:1.1rem;">${r.date}</b>
-                <span class="del-btn" onclick="del(${i})">刪除</span>
+            <div class="history-item">
+                <div>
+                    <div style="font-weight:600">${r.date}</div>
+                    <div style="font-size:0.8rem; color:#999">${r.tags ? r.tags.join(', ') : ''}</div>
+                </div>
+                <div class="del-btn" onclick="del(${i})">刪除</div>
             </div>
         `).join('');
 
         if(data.length > 0) {
-            const lastRecord = new Date(data[0].date);
-            const nextDate = new Date(lastRecord);
-            nextDate.setDate(lastRecord.getDate() + 28);
-            
+            const lastDate = new Date(data[0].date);
             const today = new Date();
             today.setHours(0,0,0,0);
             
-            const diffTime = nextDate - today;
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-            const daysCounter = document.getElementById('daysCounter');
-            const statusText = document.getElementById('statusText');
-
-            if (diffDays > 0) {
-                daysCounter.innerText = diffDays;
-                statusText.innerText = "距離下次預計 (天)";
-            } else if (diffDays === 0) {
-                daysCounter.innerText = "今天";
-                statusText.innerText = "生理期預計到來";
-            } else {
-                daysCounter.innerText = Math.abs(diffDays);
-                statusText.innerText = "已遲來 (天)";
-            }
-
-            document.getElementById('predictDateStr').innerText = "預計日期：" + nextDate.toLocaleDateString();
-        } else {
-            document.getElementById('daysCounter').innerText = "--";
-            document.getElementById('predictDateStr').innerText = "請先加入第一筆資料";
+            // 計算週期階段 (以 28 天為例)
+            const daysSinceStart = Math.floor((today - lastDate) / (1000*60*60*24));
+            updateUI(daysSinceStart, lastDate);
         }
     }
 
+    function updateUI(days, lastDate) {
+        const counter = document.getElementById('daysCounter');
+        const phase = document.getElementById('phaseText');
+        const tips = document.getElementById('warmTips');
+        
+        let nextDate = new Date(lastDate);
+        nextDate.setDate(lastDate.getDate() + 28);
+        const diffDays = Math.ceil((nextDate - new Date()) / (1000*60*60*24));
+
+        if (days >= 0 && days <= 5) {
+            phase.innerText = "生理期間";
+            counter.innerText = days + 1;
+            tips.innerText = "多喝溫水，注意保暖，可以稍微睡個午覺喔。";
+        } else if (days > 5 && days <= 13) {
+            phase.innerText = "濾泡期";
+            counter.innerText = diffDays;
+            tips.innerText = "現在是能量滿滿的時期！心情會漸漸變好，適合安排運動。";
+        } else if (days > 13 && days <= 16) {
+            phase.innerText = "排卵期";
+            counter.innerText = diffDays;
+            tips.innerText = "身體充滿魅力與活力的時間，記得多觀察肌膚狀況。";
+        } else {
+            phase.innerText = "黃體期";
+            counter.innerText = diffDays;
+            tips.innerText = "經前可能會有點情緒起伏或水腫，這很正常，多愛自己一點。";
+        }
+        
+        document.getElementById('predictDateStr').innerText = "下次預計：" + nextDate.toLocaleDateString();
+    }
+
     function del(i) {
-        if(confirm('確定要刪除這筆紀錄嗎？')) {
+        if(confirm('要刪除這筆回憶嗎？')) {
             let data = JSON.parse(localStorage.getItem(KEY) || '[]');
             data.splice(i, 1);
             localStorage.setItem(KEY, JSON.stringify(data));
@@ -204,7 +263,6 @@
     document.getElementById('dateInput').valueAsDate = new Date();
     render();
 </script>
-
 </body>
 </html>
 
