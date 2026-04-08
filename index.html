@@ -4,64 +4,206 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Flow - 生理期追蹤</title>
-    <style>
-        :root { --apple-pink: #ff375f; --apple-bg: #f2f2f7; --apple-card: #ffffff; }
-        body { font-family: -apple-system, sans-serif; background-color: var(--apple-bg); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .status-card { background: linear-gradient(135deg, #ff7e95 0%, #ff375f 100%); width: 100%; max-width: 400px; border-radius: 28px; padding: 30px 20px; color: white; text-align: center; box-shadow: 0 10px 20px rgba(255, 55, 95, 0.3); margin-bottom: 25px; box-sizing: border-box;}
-        .days-big { font-size: 4rem; font-weight: 800; margin: 10px 0; }
-        .input-group { background: var(--apple-card); width: 100%; max-width: 400px; border-radius: 20px; padding: 20px; box-sizing: border-box; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        input { width: 100%; border: none; background: #f2f2f7; padding: 12px; border-radius: 12px; margin: 8px 0 15px; font-size: 1rem; box-sizing: border-box; }
-        button { width: 100%; background-color: var(--apple-pink); color: white; border: none; padding: 15px; border-radius: 15px; font-size: 1rem; font-weight: 600; cursor: pointer; }
-        .record-card { background: var(--apple-card); border-radius: 18px; padding: 15px 20px; margin-bottom: 12px; width: 100%; max-width: 400px; display: flex; justify-content: space-between; box-sizing: border-box; box-shadow: 0 2px 5px rgba(0,0,0,0.03); }
-    </style>
-    <!-- 加入這兩行到 <head> 標籤內 -->
+    
+    <!-- Android 與 iOS 的 APP 化優化 -->
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#ff375f">
+    
+    <style>
+        :root { 
+            --apple-pink: #ff375f; 
+            --apple-bg: #f2f2f7; 
+            --apple-card: #ffffff; 
+            --apple-red: #ff3b30;
+        }
+        
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            background-color: var(--apple-bg); 
+            margin: 0; 
+            padding: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* 頂部預測狀態卡片 */
+        .status-card { 
+            background: linear-gradient(135deg, #ff7e95 0%, #ff375f 100%); 
+            width: 100%; 
+            max-width: 400px; 
+            border-radius: 28px; 
+            padding: 30px 20px; 
+            color: white; 
+            text-align: center; 
+            box-shadow: 0 10px 20px rgba(255, 55, 95, 0.3); 
+            margin-bottom: 25px; 
+            box-sizing: border-box;
+        }
+
+        .days-big { font-size: 4rem; font-weight: 800; margin: 5px 0; }
+
+        /* 輸入區域 */
+        .input-group { 
+            background: var(--apple-card); 
+            width: 100%; 
+            max-width: 400px; 
+            border-radius: 20px; 
+            padding: 20px; 
+            box-sizing: border-box; 
+            margin-bottom: 20px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+        }
+
+        label { color: #8e8e93; font-size: 0.85rem; font-weight: 600; margin-left: 5px; }
+
+        input { 
+            width: 100%; 
+            border: 2px solid transparent; 
+            background: #f2f2f7; 
+            padding: 12px; 
+            border-radius: 12px; 
+            margin: 8px 0 15px; 
+            font-size: 1rem; 
+            box-sizing: border-box;
+            outline: none;
+            transition: border 0.3s;
+        }
+        
+        input:focus { border: 2px solid var(--apple-pink); }
+
+        button { 
+            width: 100%; 
+            background-color: var(--apple-pink); 
+            color: white; 
+            border: none; 
+            padding: 15px; 
+            border-radius: 15px; 
+            font-size: 1rem; 
+            font-weight: 600; 
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        button:active { opacity: 0.8; }
+
+        /* 紀錄列表 */
+        .record-card { 
+            background: var(--apple-card); 
+            border-radius: 18px; 
+            padding: 15px 20px; 
+            margin-bottom: 12px; 
+            width: 100%; 
+            max-width: 400px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            box-sizing: border-box; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03); 
+        }
+
+        .del-btn {
+            color: var(--apple-red);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 5px 10px;
+        }
+    </style>
 </head>
 <body>
+
     <div class="status-card">
-        <h1 id="statusText" style="font-size:1.2rem; margin:0;">預計下次到來</h1>
+        <h1 id="statusText" style="font-size:1.2rem; margin:0; opacity:0.9;">距離下次預計</h1>
         <div class="days-big" id="daysCounter">--</div>
-        <div id="predictDateStr" style="font-size:0.9rem; opacity:0.8;">請先輸入紀錄</div>
+        <div id="predictDateStr" style="font-size:0.9rem; opacity:0.8;">請先加入第一筆資料</div>
     </div>
+
     <div class="input-group">
-        <label style="color:#8e8e93; font-size:0.85rem;">開始日期</label>
+        <label>開始日期</label>
         <input type="date" id="dateInput">
         <button onclick="saveRecord()">加入紀錄</button>
     </div>
+
     <div id="recordList" style="width:100%; max-width:400px;"></div>
 
 <script>
     const KEY = 'period_data';
+
     function saveRecord() {
         const date = document.getElementById('dateInput').value;
         if (!date) return;
+        
         let data = JSON.parse(localStorage.getItem(KEY) || '[]');
         data.push({date: date});
+        
+        // 排序：最新的日期在最前面
         data.sort((a,b) => new Date(b.date) - new Date(a.date));
+        
         localStorage.setItem(KEY, JSON.stringify(data));
         render();
     }
+
     function render() {
         const list = document.getElementById('recordList');
         const data = JSON.parse(localStorage.getItem(KEY) || '[]');
-        list.innerHTML = data.map((r, i) => `<div class="record-card"><b>${r.date}</b><span style="color:red" onclick="del(${i})">刪除</span></div>`).join('');
+        
+        // 渲染列表
+        list.innerHTML = data.map((r, i) => `
+            <div class="record-card">
+                <b style="font-size:1.1rem;">${r.date}</b>
+                <span class="del-btn" onclick="del(${i})">刪除</span>
+            </div>
+        `).join('');
+
+        // 計算預測
         if(data.length > 0) {
-            const last = new Date(data[0].date);
-            last.setDate(last.getDate() + 28);
-            const diff = Math.ceil((last - new Date()) / (1000*60*60*24));
-            document.getElementById('daysCounter').innerText = diff;
-            document.getElementById('predictDateStr').innerText = "預計日期：" + last.toLocaleDateString();
+            const lastRecord = new Date(data[0].date);
+            const nextDate = new Date(lastRecord);
+            nextDate.setDate(lastRecord.getDate() + 28); // 預設 28 天週期
+            
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            
+            const diffTime = nextDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            const daysCounter = document.getElementById('daysCounter');
+            const statusText = document.getElementById('statusText');
+
+            if (diffDays > 0) {
+                daysCounter.innerText = diffDays;
+                statusText.innerText = "距離下次預計 (天)";
+            } else if (diffDays === 0) {
+                daysCounter.innerText = "今天";
+                statusText.innerText = "生理期預計到來";
+            } else {
+                daysCounter.innerText = Math.abs(diffDays);
+                statusText.innerText = "已遲來 (天)";
+            }
+
+            document.getElementById('predictDateStr').innerText = "預計日期：" + nextDate.toLocaleDateString();
+        } else {
+            document.getElementById('daysCounter').innerText = "--";
+            document.getElementById('predictDateStr').innerText = "請先加入第一筆資料";
         }
     }
+
     function del(i) {
-        let data = JSON.parse(localStorage.getItem(KEY) || '[]');
-        data.splice(i, 1);
-        localStorage.setItem(KEY, JSON.stringify(data));
-        render();
+        if(confirm('確定要刪除這筆紀錄嗎？')) {
+            let data = JSON.parse(localStorage.getItem(KEY) || '[]');
+            data.splice(i, 1);
+            localStorage.setItem(KEY, JSON.stringify(data));
+            render();
+        }
     }
+
+    // 初始化日期輸入框為今天
     document.getElementById('dateInput').valueAsDate = new Date();
     render();
 </script>
+
 </body>
 </html>
